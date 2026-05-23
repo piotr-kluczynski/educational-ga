@@ -1,4 +1,4 @@
-from genetic_algorithm.Individual import Individual
+from genetic_algorithm.individual import Individual
 from genetic_algorithm.mutation import inversion
 
 if __name__ == '__main__':

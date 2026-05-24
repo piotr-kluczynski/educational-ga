@@ -2,7 +2,7 @@ class Individual:
     def __init__(self, chromosome1, chromosome2 = None, domination_chromosome = None):
         self.chromosome1 = chromosome1
         self.chromosome2 = chromosome2 # None by default
-        self.domination_chromosome = domination_chromosome
+        self.domination_chromosome = domination_chromosome # None by default
 
         self.fitness = -1 # Need to initialize using fitness function
 

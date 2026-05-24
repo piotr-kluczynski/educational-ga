@@ -12,12 +12,12 @@ def crowding_function(individual, population, sigma_share, alpha, encoding):
         elif encoding == "real":
             distance = distance_real(individual.get_phenotype(), other_individual.get_phenotype())
 
-        share_number += sharing_function(distance, sigma_share, alpha)
+        share_number += sharing(distance, sigma_share, alpha)
 
     share_number = max(share_number, 0.00000001)
-    return individual.fitness / share_number
+    return individual.practical_fitness / share_number
 
-def sharing_function(distance, sigma_share, alpha):
+def sharing(distance, sigma_share, alpha):
     if distance >= sigma_share:
         return 0
 

@@ -4,7 +4,8 @@ class Individual:
         self.chromosome2 = chromosome2 # None by default
         self.domination_chromosome = domination_chromosome # None by default
 
-        self.fitness = -1 # Need to initialize using fitness function
+        self.practical_fitness = -1 # Need to initialize using practical_fitness function
+        self.raw_fitness = -1
 
     def get_phenotype(self):
         phenotype = self.chromosome1.copy()

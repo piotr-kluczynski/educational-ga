@@ -7,7 +7,7 @@ def deterministic_sampling(population, total_fitness, pop_size):
 
     # Calculating expected counts
     for ind in population:
-        E = (ind.fitness / total_fitness) * pop_size
+        E = (ind.practical_fitness / total_fitness) * pop_size
         expected.append((ind, E))
 
         k = math.floor(E)
@@ -40,7 +40,7 @@ def deterministic_sampling(population, total_fitness, pop_size):
 
 def stochastic_sampling_with_replacement(population, pop_size):
     couples = []
-    weights = [individual.fitness for individual in population]
+    weights = [individual.practical_fitness for individual in population]
 
     for i in range(0, pop_size, 2):
         parent1_id = random.choices(range(len(population)), weights=weights, k=1)[0]
@@ -55,8 +55,8 @@ def stochastic_sampling_with_replacement(population, pop_size):
 
 def stochastic_sampling_without_replacement(population, avg_fitness, pop_size):
     couples = []
-    weights = [individual.fitness for individual in population]
-    offspring_count = [individual.fitness / avg_fitness for individual in population]
+    weights = [individual.practical_fitness for individual in population]
+    offspring_count = [individual.practical_fitness / avg_fitness for individual in population]
 
     for i in range(0, pop_size, 2):
         available = [idx for idx in range(len(population)) if offspring_count[idx] > 0]
@@ -84,7 +84,7 @@ def remainder_stochastic_sampling_with_replacement(population, total_fitness, po
 
     # Calculating expected counts
     for ind in population:
-        E = (ind.fitness / total_fitness) * pop_size
+        E = (ind.practical_fitness / total_fitness) * pop_size
         expected.append((ind, E))
 
         k = math.floor(E)
@@ -112,7 +112,7 @@ def remainder_stochastic_sampling_without_replacement(population, total_fitness,
 
     # Calculating expected counts
     for ind in population:
-        E = (ind.fitness / total_fitness) * pop_size
+        E = (ind.practical_fitness / total_fitness) * pop_size
         expected.append((ind, E))
 
         k = math.floor(E)
@@ -144,7 +144,7 @@ def remainder_stochastic_sampling_without_replacement(population, total_fitness,
     return couples
 
 def rank(population, pop_size, scaling):
-    sorted_population = sorted(population, key=lambda ind: ind.fitness)
+    sorted_population = sorted(population, key=lambda ind: ind.practical_fitness)
     mating_pool = []
     couples = []
     ranks = []
@@ -168,7 +168,7 @@ def tournament(population, pop_size, k=2):
 
     for i in range(pop_size):
         contestants = random.sample(population, k)
-        winner = max(contestants, key=lambda ind: ind.fitness)
+        winner = max(contestants, key=lambda ind: ind.practical_fitness)
 
         mating_pool.append(winner)
 
@@ -182,7 +182,7 @@ def tournament(population, pop_size, k=2):
 def stochastic_tournament(population, pop_size):
     couples = []
     mating_pool = []
-    weights = [individual.fitness for individual in population]
+    weights = [individual.practical_fitness for individual in population]
 
     for i in range(0, pop_size):
         # Finding couple for a tournament
@@ -196,7 +196,7 @@ def stochastic_tournament(population, pop_size):
         parent1 = population[parent1_id]
         parent2 = population[parent2_id]
 
-        mating_pool.append(parent1 if parent1.fitness >= parent2.fitness else parent2)
+        mating_pool.append(parent1 if parent1.practical_fitness >= parent2.practical_fitness else parent2)
 
     # Creating couples
     random.shuffle(mating_pool)

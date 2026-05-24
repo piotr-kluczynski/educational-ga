@@ -1,5 +1,5 @@
-import random
 import numpy as np
+import random
 
 # NATURAL & REAL NUMBER OPERATORS
 def kpoint_crossover(chromosome1, chromosome2, k, p_crossover): # 0 < k <= len(chromosome)

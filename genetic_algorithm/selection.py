@@ -205,4 +205,3 @@ def stochastic_tournament(population, pop_size):
         couples.append((mating_pool[i], mating_pool[i+1]))
 
     return couples
-

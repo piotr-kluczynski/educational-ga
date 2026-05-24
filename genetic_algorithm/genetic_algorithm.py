@@ -4,7 +4,9 @@ from mutation import single_point
 from individual import Individual
 
 
-def initialize_population(chromosome_length, alphabet, domains, encoding, is_haploidal, pop_size, fitness_function, crowding_function):
+def initialize_population(pop_size, chromosome_length, alphabet, domains, encoding, # Basic parameters
+                          fitness_function, # Partial functions that need to be provided
+                          is_diploid=False, crowding_function=None): # Optional parameters
     population = []
 
     for _ in range(pop_size):
@@ -22,7 +24,7 @@ def initialize_population(chromosome_length, alphabet, domains, encoding, is_hap
 
         new_individual = Individual(chromosome1)
 
-        if is_haploidal:
+        if is_diploid:
             chromosome2 = []
             domination_chromosome = [random.randint(0, 1) for _ in range(chromosome_length)]
 
@@ -51,11 +53,11 @@ def initialize_population(chromosome_length, alphabet, domains, encoding, is_hap
         for individual in population:
             individual.practical_fitness = crowding_function(individual, population)
 
-    return population
+    return population #
 
-def next_generation(prev_gen, pop_size, p_mutation,
-                    fitness_function, crossover, mutation, selection, crowding_function,
-                    is_diploid=False, elite_size=0, replacement=1):
+def next_generation(prev_gen, pop_size, p_mutation, # Basic parameters
+                    fitness_function, crossover, mutation, selection, # Partial functions that need to be provided
+                    is_diploid=False, crowding_function=None, elite_size=0, replacement=1): # Optional parameters
     offsprings = []
     couples = selection(prev_gen, pop_size)
 
@@ -123,12 +125,14 @@ def next_generation(prev_gen, pop_size, p_mutation,
 
     return next_gen
 
-def run_genetic_algorithm(pop_size, chromosome_length, alphabet, p_mutation, crossover, mutation, selection, elite_size, replacement, encoding, is_diploid, domains, fitness_function, crowding_function, end_condition):
+def run_genetic_algorithm(pop_size, chromosome_length, alphabet, domains, encoding, p_mutation, end_condition,
+                          crossover, mutation, selection, fitness_function, # Partial functions that need to be provided
+                          is_diploid=False, crowding_function=None, elite_size=0, replacement=1): # Optional parameters
     gen_count = 0
-    prev_population = initialize_population(chromosome_length, alphabet, domains, encoding, is_diploid, pop_size, fitness_function, crowding_function)
+    prev_population = initialize_population(pop_size, chromosome_length, alphabet, domains, encoding, fitness_function, is_diploid, crowding_function)
 
     while end_condition(gen_count, prev_population) is False:
-        next_population = next_generation(prev_population, pop_size, p_mutation, fitness_function, crossover, mutation, selection, crowding_function, is_diploid=is_diploid, elite_size=elite_size, replacement=replacement)
+        next_population = next_generation(prev_population, pop_size, p_mutation, fitness_function, crossover, mutation, selection, is_diploid, crowding_function, elite_size, replacement)
         prev_population = next_population
         gen_count += 1
 

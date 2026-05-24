@@ -1,7 +1,9 @@
 import random
 import math
 
-def deterministic_sampling(population, total_fitness, pop_size):
+def deterministic_sampling(population, pop_size):
+    total_fitness = sum(ind.fitness for ind in population)
+
     mating_pool = []
     expected = []
 
@@ -37,7 +39,6 @@ def deterministic_sampling(population, total_fitness, pop_size):
 
     return couples
 
-
 def stochastic_sampling_with_replacement(population, pop_size):
     couples = []
     weights = [individual.practical_fitness for individual in population]
@@ -53,7 +54,9 @@ def stochastic_sampling_with_replacement(population, pop_size):
 
     return couples
 
-def stochastic_sampling_without_replacement(population, avg_fitness, pop_size):
+def stochastic_sampling_without_replacement(population, pop_size):
+    avg_fitness = sum(ind.fitness for ind in population) / len(population)
+
     couples = []
     weights = [individual.practical_fitness for individual in population]
     offspring_count = [individual.practical_fitness / avg_fitness for individual in population]
@@ -77,7 +80,9 @@ def stochastic_sampling_without_replacement(population, avg_fitness, pop_size):
 
     return couples
 
-def remainder_stochastic_sampling_with_replacement(population, total_fitness, pop_size):
+def remainder_stochastic_sampling_with_replacement(population, pop_size):
+    total_fitness = sum(ind.fitness for ind in population)
+
     mating_pool = []
     expected = []
     remainders = []
@@ -105,7 +110,9 @@ def remainder_stochastic_sampling_with_replacement(population, total_fitness, po
 
     return couples
 
-def remainder_stochastic_sampling_without_replacement(population, total_fitness, pop_size):
+def remainder_stochastic_sampling_without_replacement(population, pop_size):
+    total_fitness = sum(ind.fitness for ind in population)
+
     mating_pool = []
     expected = []
     remainders = []

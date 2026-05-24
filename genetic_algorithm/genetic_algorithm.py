@@ -67,17 +67,17 @@ def next_generation(prev_gen, pop_size, p_mutation, # Basic parameters
         # Creating chromosome1
         child1_chromosome1, child2_chromosome1 = crossover(parent1.chromosome1, parent2.chromosome1)
 
-        child1_chromosome1 = mutation(child1_chromosome1, p_mutation)
-        child2_chromosome1 = mutation(child2_chromosome1, p_mutation)
+        child1_chromosome1 = mutation(child1_chromosome1)
+        child2_chromosome1 = mutation(child2_chromosome1)
 
         # Creating chromosome2 and domination_chromosome in case of diploidal
         if is_diploid:
             child1_chromosome2, child2_chromosome2 = crossover(parent1.chromosome2, parent2.chromosome2)
             child1_domination_chromosome, child2_domination_chromosome = crossover(parent1.domination_chromosome, parent2.domination_chromosome)
 
-            child1_chromosome2 = mutation(child1_chromosome2, p_mutation)
+            child1_chromosome2 = mutation(child1_chromosome2)
             child1_domination_chromosome = single_point(child1_domination_chromosome, [0, 1], p_mutation)
-            child2_chromosome2 = mutation(child2_chromosome2, p_mutation)
+            child2_chromosome2 = mutation(child2_chromosome2)
             child2_domination_chromosome = single_point(child2_domination_chromosome, [0, 1], p_mutation)
 
 

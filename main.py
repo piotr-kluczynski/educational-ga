@@ -77,6 +77,13 @@ def main():
     print("\nKONFIGURACJA META-PARAMETRÓW ALGORYTMU")
     print("(Wciśnij ENTER, aby użyć wartości domyślnej)")
 
+    chromosome_length = 0
+    if mode == '1':
+        chromosome_length = get_parameter("Długość chromosomu (np. 8, 16, 32, musi być parzysta do funkcji 2D)", 16, int)
+        if chromosome_length % 2 != 0:
+            chromosome_length += 1
+            print(f"Uwaga: Długość chromosomu zmieniona na {chromosome_length}, aby umożliwić podział na osie X i Y.")
+
     pop_size = get_parameter("Rozmiar populacji (np. 20, 50, 100)", 20 if mode != '2' else 30, int)
     elite_size = get_parameter("Rozmiar elity (ile najlepszych osobników przechodzi bez zmian)", 0, int)
     replacement_rate = get_parameter("Część zastępowanej populacji (Generational Gap 0.0 - 1.0)", 1.0, float)
@@ -111,10 +118,8 @@ def main():
     mutation_operator = None
     fitness_evaluator = None
     initialization_func = None
-    chromosome_length = 0
 
     if mode == '1':
-        chromosome_length = 8
         print("\nALFABET CHROMOSOMU")
         alphabet_input = input("Wprowadź własny alfabet oddzielony spacjami [Domyślnie: 0 1]: ")
         if not alphabet_input.strip(): bin_alphabet = [0, 1]
@@ -123,9 +128,13 @@ def main():
         print("\nDEFINICJA FUNKCJI DOCELOWEJ")
         print(f"1. OneMax (Suma znaków docelowych, domyślnie '{bin_alphabet[-1]}')")
         print(f"2. ZeroMax (Kara za znaki docelowe)")
-        print("3. Własny wzór matematyczny (zmienna 'c' to lista genów, 't' to generacja)")
-        func_choice = get_parameter("Wybór (1-3)", 1, int)
-        custom_formula = input("Podaj wzór (np. sum(c) + t): ") if func_choice == 3 else None
+        print("3. Funkcja Krajobrazu ( x*sin + y*cos )")
+        print("4. Funkcja Sferyczna ( x^2 + y^2 )")
+        print("5. Rastrigin (Wiele minimów lokalnych)")
+        print("6. Zmienna w czasie (Falujące dno, funkcja czasu 't')")
+        print("7. Własny wzór matematyczny (zmienne 'x' i 'y' zdekodowane z bitów, 't' to generacja)")
+        func_choice = get_parameter("Wybór (1-7)", 1, int)
+        custom_formula = input("Podaj wzór (np. x**2 + y**2 + t): ") if func_choice == 7 else None
 
         objective_func = partial(binary_evaluator, func_type=func_choice, state=state, custom_formula=custom_formula, target_char=str(bin_alphabet[-1]), direction_mult=direction_mult)
         fitness_evaluator = configure_scaling(objective_func)
@@ -261,19 +270,31 @@ def main():
 
         print("\nDostępne opcje:")
         print("1. Przejdź o N generacji")
-        if mode == '1': print("2. Wyszukaj schemat w populacji.")
-        elif mode == '2': print("2. Pokaż animację krajobrazu 2D na żywo.")
-        elif mode == '3': print("2. Pokaż na mapie najlepszą trasę kuriera.")
-        print("3. Wykres zbieżności algorytmu.")
-        print("4. Wyświetl szczegóły wszystkich osobników.")
-        print("5. Pokaż statystyki globalne (Podsumowanie).")
-        print("6. Resetuj populację.")
-        print("7. Eksportuj statystyki do pliku CSV.")
-        print("8. Zakończ.")
+        if mode == '1':
+            print("2. Wyszukaj schemat w populacji.")
+            print("3. Pokaż animację krajobrazu 2D na żywo.")
+            print("4. Wykres zbieżności algorytmu.")
+            print("5. Wyświetl szczegóły wszystkich osobników.")
+            print("6. Pokaż statystyki globalne (Podsumowanie).")
+            print("7. Resetuj populację.")
+            print("8. Eksportuj statystyki do pliku CSV.")
+            print("9. Zakończ.")
+            mapping = {'1': '1', '2': 'schema', '3': 'anim', '4': 'chart', '5': 'details', '6': 'stats', '7': 'reset', '8': 'export', '9': 'exit'}
+        else:
+            if mode == '2': print("2. Pokaż animację krajobrazu 2D na żywo.")
+            elif mode == '3': print("2. Pokaż na mapie najlepszą trasę kuriera.")
+            print("3. Wykres zbieżności algorytmu.")
+            print("4. Wyświetl szczegóły wszystkich osobników.")
+            print("5. Pokaż statystyki globalne (Podsumowanie).")
+            print("6. Resetuj populację.")
+            print("7. Eksportuj statystyki do pliku CSV.")
+            print("8. Zakończ.")
+            mapping = {'1': '1', '2': 'anim', '3': 'chart', '4': 'details', '5': 'stats', '6': 'reset', '7': 'export', '8': 'exit'}
 
         choice = input("Wybierz opcję: ")
+        mapped_choice = mapping.get(choice, 'unknown')
 
-        if choice == '1':
+        if mapped_choice == '1':
             try:
                 steps = int(input("Ile generacji obliczyć? (np. 1): "))
                 for i in range(steps):
@@ -287,19 +308,34 @@ def main():
                     save_statistics(state['population'], state['gen'])
             except ValueError: print("Błąd: Podaj liczbę całkowitą.")
 
-        elif choice == '2':
+        elif mapped_choice == 'schema':
+            pattern = input("Podaj schemat do wyszukania (np. **1*0*1*): ")
+            found = find_matching_schemas(state['population'], pattern)
+            if found:
+                print(f"\nZnaleziono {len(found)} osobników:"); [print(f"- {os}") for os in found]
+            else: print(f"Brak dopasowań dla schematu: {pattern}")
+
+        elif mapped_choice == 'anim':
             if mode == '1':
-                pattern = input("Podaj schemat do wyszukania (np. **1*0*1*): ")
-                found = find_matching_schemas(state['population'], pattern)
-                if found:
-                    print(f"\nZnaleziono {len(found)} osobników:"); [print(f"- {os}") for os in found]
-                else: print(f"Brak dopasowań dla schematu: {pattern}")
-            elif mode == '2': run_animation(state, pop_size, fitness_evaluator, count_crossover, count_mutation, selection_operator, is_diploid, crowding_func, elite_size, replacement_rate, save_statistics)
-            elif mode == '3': show_tsp_route(state['population'], selected_cities, state['gen'])
+                max_val = (1 << (chromosome_length // 2)) - 1
+                if max_val <= 0: max_val = 1
+                def decode_bin(chrom):
+                    half = len(chrom) // 2
+                    x_b = ['1' if str(g) == str(bin_alphabet[-1]) else '0' for g in chrom[:half]]
+                    y_b = ['1' if str(g) == str(bin_alphabet[-1]) else '0' for g in chrom[half:]]
+                    x_int = int("".join(x_b), 2) if x_b else 0
+                    y_int = int("".join(y_b), 2) if y_b else 0
+                    return -5.0 + 10.0 * (x_int / max_val), -5.0 + 10.0 * (y_int / max_val)
+                
+                run_animation(state, pop_size, fitness_evaluator, count_crossover, count_mutation, selection_operator, is_diploid, crowding_func, elite_size, replacement_rate, save_statistics, bounds=(-5, 5), decode_func=decode_bin)
+            elif mode == '2':
+                run_animation(state, pop_size, fitness_evaluator, count_crossover, count_mutation, selection_operator, is_diploid, crowding_func, elite_size, replacement_rate, save_statistics)
+            elif mode == '3':
+                show_tsp_route(state['population'], selected_cities, state['gen'])
 
-        elif choice == '3': show_line_chart(history_gen, history_best, history_avg, history_worst, history_std)
+        elif mapped_choice == 'chart': show_line_chart(history_gen, history_best, history_avg, history_worst, history_std)
 
-        elif choice == '4':
+        elif mapped_choice == 'details':
             print(f"\nPopulacja w Generacji: {state['gen']}")
             for i, ind in enumerate(state['population']):
                 phenotype = ind.get_phenotype()
@@ -311,16 +347,16 @@ def main():
                     d = "".join(map(str, ind.domination_chromosome)) if mode == '1' else ind.domination_chromosome
                     print(f"   (Chr1: {c1} | Chr2: {c2} | Dom: {d})")
 
-        elif choice == '5':
+        elif mapped_choice == 'stats':
             if not state['global_best_individual']: print("\nBrak danych."); continue
             print(f"\nSTATYSTYKI GLOBALNE - PODSUMOWANIE DZIAŁANIA\nLiczba krzyżowań: {state['total_crossovers']} | Liczba mutacji: {state['total_mutations']}")
             phenotype = state['global_best_individual'].get_phenotype()
             display_phenotype = "".join(map(str, phenotype)) if mode == '1' else ([round(float(x), 4) for x in phenotype] if mode == '2' else phenotype)
             print(f"Najlepszy osobnik: {display_phenotype} | Fitness: {state['global_best_fitness']:f} | Generacja powstania: {state['best_generation']}")
 
-        elif choice == '6': reset_simulation()
+        elif mapped_choice == 'reset': reset_simulation()
 
-        elif choice == '7':
+        elif mapped_choice == 'export':
             if not history_gen: print("\nBrak danych do eksportu."); continue
             file_name = input("\nPodaj nazwę pliku (np. wyniki.csv) [Domyślnie: statystyki.csv]: ").strip()
             if not file_name: file_name = "statystyki.csv"
@@ -334,7 +370,7 @@ def main():
                 print(f"Dane zapisane w: {file_name}")
             except Exception as e: print(f"Błąd zapisu: {e}")
 
-        elif choice == '8': sys.exit(0)
+        elif mapped_choice == 'exit': sys.exit(0)
         else: print("\nNieznana opcja. Spróbuj ponownie.")
 
 if __name__ == "__main__":

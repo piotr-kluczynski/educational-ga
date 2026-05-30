@@ -13,18 +13,24 @@ from genetic_algorithm.crossover import kpoint_crossover, uniform, intermediate_
 from genetic_algorithm.mutation import single_point, gauss, rotation, inversion
 
 
-def main():
+def run_app():
+    print("\n" + "="*50)
     print("APLIKACJA EDUKACYJNA: ALGORYTMY GENETYCZNE")
+    print("="*50)
     print("\nWybierz tryb pracy algorytmu:")
     print("1. Optymalizacja funkcji liczb całkowitych (Binarne).")
     print("2. Optymalizacja funkcji liczb zmiennoprzecinkowych (Ciągłe).")
     print("3. Problemy porządkowania (Problem Komiwojażera).")
+    print("0. Zakończ program.")
 
-    mode = input("Twój wybór (1-3): ")
+    mode = input("Twój wybór (0-3): ")
+
+    if mode == '0':
+        sys.exit(0)
 
     if mode not in ['1', '2', '3']:
-        print("Nieznany tryb. Zamykam program.")
-        sys.exit(1)
+        print("Nieznany tryb. Spróbuj ponownie.")
+        return
 
     mode_name = ""
     if mode == '1': mode_name = "BINARNY (NATURALNY)"
@@ -278,8 +284,9 @@ def main():
             print("6. Pokaż statystyki globalne (Podsumowanie).")
             print("7. Resetuj populację.")
             print("8. Eksportuj statystyki do pliku CSV.")
-            print("9. Zakończ.")
-            mapping = {'1': '1', '2': 'schema', '3': 'anim', '4': 'chart', '5': 'details', '6': 'stats', '7': 'reset', '8': 'export', '9': 'exit'}
+            print("9. Zmień tryb pracy (Powrót do menu).")
+            print("10. Zakończ aplikację.")
+            mapping = {'1': '1', '2': 'schema', '3': 'anim', '4': 'chart', '5': 'details', '6': 'stats', '7': 'reset', '8': 'export', '9': 'back', '10': 'exit'}
         else:
             if mode == '2': print("2. Pokaż animację krajobrazu 2D na żywo.")
             elif mode == '3': print("2. Pokaż na mapie najlepszą trasę kuriera.")
@@ -288,8 +295,9 @@ def main():
             print("5. Pokaż statystyki globalne (Podsumowanie).")
             print("6. Resetuj populację.")
             print("7. Eksportuj statystyki do pliku CSV.")
-            print("8. Zakończ.")
-            mapping = {'1': '1', '2': 'anim', '3': 'chart', '4': 'details', '5': 'stats', '6': 'reset', '7': 'export', '8': 'exit'}
+            print("8. Zmień tryb pracy (Powrót do menu).")
+            print("9. Zakończ aplikację.")
+            mapping = {'1': '1', '2': 'anim', '3': 'chart', '4': 'details', '5': 'stats', '6': 'reset', '7': 'export', '8': 'back', '9': 'exit'}
 
         choice = input("Wybierz opcję: ")
         mapped_choice = mapping.get(choice, 'unknown')
@@ -370,8 +378,16 @@ def main():
                 print(f"Dane zapisane w: {file_name}")
             except Exception as e: print(f"Błąd zapisu: {e}")
 
+        elif mapped_choice == 'back':
+            print("\nWracam do menu głównego...\n")
+            return
+
         elif mapped_choice == 'exit': sys.exit(0)
         else: print("\nNieznana opcja. Spróbuj ponownie.")
+
+def main():
+    while True:
+        run_app()
 
 if __name__ == "__main__":
     main()

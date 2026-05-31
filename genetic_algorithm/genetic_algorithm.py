@@ -1,7 +1,7 @@
 import random
 
-from mutation import single_point
-from individual import Individual
+from .mutation import single_point
+from .individual import Individual
 
 
 def initialize_population(pop_size, chromosome_length, alphabet, domains, encoding, # Basic parameters

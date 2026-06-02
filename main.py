@@ -23,14 +23,13 @@ def run_app():
     print("3. Problemy porządkowania (Problem Komiwojażera).")
     print("0. Zakończ program.")
 
-    mode = input("Twój wybór (0-3): ")
-
-    if mode == '0':
-        sys.exit(0)
-
-    if mode not in ['1', '2', '3']:
+    while True:
+        mode = input("Twój wybór (0-3): ")
+        if mode == '0':
+            sys.exit(0)
+        if mode in ['1', '2', '3']:
+            break
         print("Nieznany tryb. Spróbuj ponownie.")
-        return
 
     mode_name = ""
     if mode == '1': mode_name = "BINARNY (NATURALNY)"
@@ -55,7 +54,7 @@ def run_app():
         print("\nKIERUNEK OPTYMALIZACJI")
         print("1. Maksymalizacja (Szukaj najwyższego punktu / największej wartości)")
         print("2. Minimalizacja (Szukaj najniższego punktu / najmniejszej wartości)")
-        dir_choice = get_parameter("Wybór (1-2)", 1, int)
+        dir_choice = get_parameter("Wybór (1-2)", 1, int, min_val=1, max_val=2)
         if dir_choice == 2:
             direction_mult = -1.0
             print("Uwaga: Wybrano minimalizację. Do selekcji zalecamy użyć Metody Turniejowej (radzi sobie z ujemnym fitnessem).")
@@ -67,7 +66,7 @@ def run_app():
         custom_cities = input("Czy chcesz wprowadzić własne współrzędne miast? (T/N) [Domyślnie: N]: ").strip().upper()
         if custom_cities == 'T':
             selected_cities = []
-            count = get_parameter("Ile miast chcesz dodać na mapę? (minimum 3)", 5, int)
+            count = get_parameter("Ile miast chcesz dodać na mapę? (minimum 3)", 5, int, min_val=3)
             count = max(3, count)
             print("\nWprowadź współrzędne miast (X i Y) oddzielone spacją (np. '2.5 4.0'):")
             for i in range(count):
@@ -85,14 +84,14 @@ def run_app():
 
     chromosome_length = 0
     if mode == '1':
-        chromosome_length = get_parameter("Długość chromosomu (np. 8, 16, 32, musi być parzysta do funkcji 2D)", 16, int)
+        chromosome_length = get_parameter("Długość chromosomu (np. 8, 16, 32, musi być parzysta do funkcji 2D)", 16, int, min_val=2)
         if chromosome_length % 2 != 0:
             chromosome_length += 1
             print(f"Uwaga: Długość chromosomu zmieniona na {chromosome_length}, aby umożliwić podział na osie X i Y.")
 
-    pop_size = get_parameter("Rozmiar populacji (np. 20, 50, 100)", 20 if mode != '2' else 30, int)
-    elite_size = get_parameter("Rozmiar elity (ile najlepszych osobników przechodzi bez zmian)", 0, int)
-    replacement_rate = get_parameter("Część zastępowanej populacji (Generational Gap 0.0 - 1.0)", 1.0, float)
+    pop_size = get_parameter("Rozmiar populacji (np. 20, 50, 100)", 20 if mode != '2' else 30, int, min_val=2)
+    elite_size = get_parameter("Rozmiar elity (ile najlepszych osobników przechodzi bez zmian)", 0, int, min_val=0)
+    replacement_rate = get_parameter("Część zastępowanej populacji (Generational Gap 0.0 - 1.0)", 1.0, float, min_val=0.0, max_val=1.0)
 
     while True:
         diploid_ans = input("Czy użyć osobników diploidalnych? (T/N) [Domyślnie: N]: ").strip().upper()
@@ -102,19 +101,24 @@ def run_app():
         else:
             print("Błędna wartość. Wpisz 'T' dla TAK lub 'N' dla NIE (lub wciśnij ENTER).")
 
-    p_cross = get_parameter("Prawdopodobieństwo krzyżowania (0.0 - 1.0)", 0.8, float)
-    k_points = get_parameter("Liczba punktów krzyżowania (k)", 1, int) if mode in ['1', '2'] else 1
+    p_cross = get_parameter("Prawdopodobieństwo krzyżowania (0.0 - 1.0)", 0.8, float, min_val=0.0, max_val=1.0)
+    k_points = get_parameter("Liczba punktów krzyżowania (k)", 1, int, min_val=1) if mode in ['1', '2'] else 1
 
     default_mut = 0.1 if mode == '1' else (0.3 if mode == '2' else 0.2)
-    p_mut = get_parameter("Prawdopodobieństwo mutacji (0.0 - 1.0)", default_mut, float)
+    p_mut = get_parameter("Prawdopodobieństwo mutacji (0.0 - 1.0)", default_mut, float, min_val=0.0, max_val=1.0)
     state['current_p_mut'] = p_mut
 
     print("\nMECHANIZM ZAPOBIEGANIA NISZOM (SHARING)")
-    use_sharing = input("Czy użyć mechanizmu zapobiegania niszom? (T/N) [Domyślnie: N]: ").strip().upper()
+    while True:
+        use_sharing = input("Czy użyć mechanizmu zapobiegania niszom? (T/N) [Domyślnie: N]: ").strip().upper()
+        if use_sharing in ['T', 'N', '']:
+            break
+        print("Błędna wartość. Wpisz 'T' dla TAK lub 'N' dla NIE (lub wciśnij ENTER).")
+    
     crowding_func = None
     if use_sharing == 'T':
-        sigma_s = get_parameter("Parametr przestrzeni niszy (sigma_share)", 2.0, float)
-        alpha_s = get_parameter("Parametr skalowania dystansu (alpha)", 1.0, float)
+        sigma_s = get_parameter("Parametr przestrzeni niszy (sigma_share)", 2.0, float, min_val=0.001)
+        alpha_s = get_parameter("Parametr skalowania dystansu (alpha)", 1.0, float, min_val=0.001)
         sharing_encoding = "binary" if mode == '1' else ("real" if mode == '2' else "ordering")
         crowding_func = partial(crowding_function, sigma_share=sigma_s, alpha=alpha_s, encoding=sharing_encoding)
 
@@ -139,7 +143,7 @@ def run_app():
         print("5. Rastrigin (Wiele minimów lokalnych)")
         print("6. Zmienna w czasie (Falujące dno, funkcja czasu 't')")
         print("7. Własny wzór matematyczny (zmienne 'x' i 'y' zdekodowane z bitów, 't' to generacja)")
-        func_choice = get_parameter("Wybór (1-7)", 1, int)
+        func_choice = get_parameter("Wybór (1-7)", 1, int, min_val=1, max_val=7)
         custom_formula = input("Podaj wzór (np. x**2 + y**2 + t): ") if func_choice == 7 else None
 
         objective_func = partial(binary_evaluator, func_type=func_choice, state=state, custom_formula=custom_formula, target_char=str(bin_alphabet[-1]), direction_mult=direction_mult)
@@ -149,7 +153,7 @@ def run_app():
         print("\nWYBÓR METODY KRZYŻOWANIA")
         print("1. K-punktowe (k-Point Crossover)")
         print("2. Równomierne (Uniform Crossover)")
-        cross_choice = get_parameter("Wybór", 1, int)
+        cross_choice = get_parameter("Wybór", 1, int, min_val=1, max_val=2)
         crossover_operator = partial(uniform, p_crossover=p_cross) if cross_choice == 2 else partial(kpoint_crossover, k=k_points, p_crossover=p_cross)
 
         print("\nWYBÓR METODY MUTACJI")
@@ -167,7 +171,7 @@ def run_app():
         print("3. Rastrigin (Wiele minimów lokalnych)")
         print("4. Zmienna w czasie (Falujące dno, funkcja czasu 't')")
         print("5. Własny wzór (dostępne zmienne: 'x', 'y', 't', operatory: np.sin, math.cos)")
-        func_choice = get_parameter("Wybór (1-5)", 1, int)
+        func_choice = get_parameter("Wybór (1-5)", 1, int, min_val=1, max_val=5)
         custom_formula = input("Podaj wzór (np. x**2 + y**2 + np.sin(t)): ") if func_choice == 5 else None
 
         objective_func = partial(continuous_evaluator, func_type=func_choice, state=state, custom_formula=custom_formula, direction_mult=direction_mult)
@@ -178,14 +182,14 @@ def run_app():
         print("1. K-punktowe (k-Point Crossover)")
         print("2. Równomierne (Uniform Crossover)")
         print("3. Rekombinacja pośrednia (Intermediate Recombination)")
-        cross_choice = get_parameter("Wybór", 3, int)
+        cross_choice = get_parameter("Wybór", 3, int, min_val=1, max_val=3)
         if cross_choice == 1: crossover_operator = partial(kpoint_crossover, k=k_points, p_crossover=p_cross)
         elif cross_choice == 2: crossover_operator = partial(uniform, p_crossover=p_cross)
         else: crossover_operator = partial(intermediate_recombination, p_crossover=p_cross)
 
         print("\nWYBÓR METODY MUTACJI")
         print("1. Mutacja Gaussa (Gaussian Mutation)")
-        mutation_scale = get_parameter("Skala mutacji (odchylenie standardowe)", 0.5, float)
+        mutation_scale = get_parameter("Skala mutacji (odchylenie standardowe)", 0.5, float, min_val=0.001)
         mutation_operator = partial(gauss, p_mutate=p_mut, bounds=domains, mutation_scale=mutation_scale)
         print("\nTRYB CIĄGŁY (LICZBY RZECZYWISTE)")
 
@@ -196,7 +200,7 @@ def run_app():
         print("\nDEFINICJA FUNKCJI DOCELOWEJ")
         print("1. Klasyczny TSP (Stałe odległości)")
         print("2. TSP Dynamiczny (Zmienne warunki drogowe w czasie 't')")
-        func_choice = get_parameter("Wybór (1-2)", 1, int)
+        func_choice = get_parameter("Wybór (1-2)", 1, int, min_val=1, max_val=2)
 
         objective_func = partial(tsp_evaluator, func_type=func_choice, state=state, selected_cities=selected_cities)
         fitness_evaluator = configure_scaling(objective_func)
@@ -206,7 +210,7 @@ def run_app():
         print("1. Partially Mapped Crossover (PMX)")
         print("2. Order Crossover (OX)")
         print("3. Cycle Crossover (CX)")
-        cross_choice = get_parameter("Wybór", 1, int)
+        cross_choice = get_parameter("Wybór", 1, int, min_val=1, max_val=3)
         if cross_choice == 2: crossover_operator = partial(order, p_crossover=p_cross)
         elif cross_choice == 3: crossover_operator = partial(cycle, p_crossover=p_cross)
         else: crossover_operator = partial(partially_mapped, p_crossover=p_cross)
@@ -214,10 +218,14 @@ def run_app():
         print("\nWYBÓR METODY MUTACJI")
         print("1. Inwersja (Inversion)")
         print("2. Rotacja (Rotation)")
-        mut_choice = get_parameter("Wybór", 1, int)
+        mut_choice = get_parameter("Wybór", 1, int, min_val=1, max_val=2)
         if mut_choice == 2:
-            direction = input("Kierunek rotacji (left/right) [Domyślnie: right]: ").strip().lower()
-            step = get_parameter("Krok rotacji", 1, int)
+            while True:
+                direction = input("Kierunek rotacji (left/right) [Domyślnie: right]: ").strip().lower()
+                if direction in ['left', 'right', '']:
+                    break
+                print("Błędna wartość. Wpisz 'left' lub 'right'.")
+            step = get_parameter("Krok rotacji", 1, int, min_val=1)
             mutation_operator = partial(rotation, p_mutate=p_mut, rotation_step=step, direction=direction if direction in ['left', 'right'] else 'right')
         else:
             mutation_operator = partial(inversion, p_mutate=p_mut)
@@ -269,7 +277,7 @@ def run_app():
         if state['population']:
             fitness_values = [ind.practical_fitness for ind in state['population']]
             std_dev = np.std(fitness_values)
-            print(f"\nTRYB: {mode_name} | GENERACJA: {state['gen']}")
+            print(f"\nTRYB: {mode_name} | \nGENERACJA: {state['gen']}")
             print(f"OPERACJE - Liczba krzyżowań: {state['crossover_count']} | Liczba mutacji: {state['mutation_count']}")
             print(f"FITNESS -  Najlepszy: {max(fitness_values):.4f} | Średni: {sum(fitness_values)/len(fitness_values):.4f} | Najgorszy: {min(fitness_values):.4f}")
             print(f"POPULACJA - Odchylenie standardowe: {std_dev:.4f}")
@@ -303,18 +311,16 @@ def run_app():
         mapped_choice = mapping.get(choice, 'unknown')
 
         if mapped_choice == '1':
-            try:
-                steps = int(input("Ile generacji obliczyć? (np. 1): "))
-                for i in range(steps):
-                    state['crossover_count'] = state['mutation_count'] = 0
-                    state['population'] = next_generation(
-                        prev_gen=state['population'], pop_size=pop_size, p_mutation=state['current_p_mut'],
-                        fitness_function=fitness_evaluator, crossover=count_crossover, mutation=count_mutation,
-                        selection=selection_operator, is_diploid=is_diploid, crowding_function=crowding_func,
-                        elite_size=elite_size, replacement=replacement_rate)
-                    state['gen'] += 1
-                    save_statistics(state['population'], state['gen'])
-            except ValueError: print("Błąd: Podaj liczbę całkowitą.")
+            steps = get_parameter("Ile generacji obliczyć?", 1, int, min_val=1)
+            for i in range(steps):
+                state['crossover_count'] = state['mutation_count'] = 0
+                state['population'] = next_generation(
+                    prev_gen=state['population'], pop_size=pop_size, p_mutation=state['current_p_mut'],
+                    fitness_function=fitness_evaluator, crossover=count_crossover, mutation=count_mutation,
+                    selection=selection_operator, is_diploid=is_diploid, crowding_function=crowding_func,
+                    elite_size=elite_size, replacement=replacement_rate)
+                state['gen'] += 1
+                save_statistics(state['population'], state['gen'])
 
         elif mapped_choice == 'schema':
             pattern = input("Podaj schemat do wyszukania (np. **1*0*1*): ")

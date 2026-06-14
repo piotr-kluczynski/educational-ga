@@ -146,6 +146,9 @@ def cycle(chromosome1, chromosome2, p_crossover):
     visited = [False] * len(chromosome1)
     cycle_counter = 0
 
+    # Ensure chromosome2 can be searched properly
+    is_list = isinstance(chromosome2, list)
+
     for start in range(len(chromosome1)):
         if visited[start]:
             continue
@@ -159,7 +162,10 @@ def cycle(chromosome1, chromosome2, p_crossover):
             cycle_indices.append(idx)
 
             value = chromosome1[idx]
-            idx = np.where(chromosome2 == value)[0][0]
+            if is_list:
+                idx = chromosome2.index(value)
+            else:
+                idx = np.where(chromosome2 == value)[0][0]
 
         # Assigning the cycle_counter
         if cycle_counter % 2 == 0:
@@ -171,6 +177,6 @@ def cycle(chromosome1, chromosome2, p_crossover):
                 child1[i] = chromosome2[i]
                 child2[i] = chromosome1[i]
 
-            cycle_counter += 1
+        cycle_counter += 1
 
     return child1, child2
